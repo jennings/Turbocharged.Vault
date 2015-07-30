@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Security;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
@@ -14,7 +15,10 @@ namespace Turbocharged.Vault
     {
         readonly HttpClient _client = new HttpClient();
         readonly Uri _baseUri;
-        readonly IAuthenticationMethod _auth;
+        readonly SemaphoreSlim _authLock = new SemaphoreSlim(1, 1);
+
+        bool _authenticated = false;
+        IAuthenticationMethod _auth;
 
         /// <summary>
         /// A client for communicating with a Vault server.
@@ -27,23 +31,65 @@ namespace Turbocharged.Vault
             _auth = authentication;
         }
 
-        public async Task AuthorizeAsync()
+        public Task AuthenticateAsync(IAuthenticationMethod authentication)
         {
-            var token = await _auth.GetTokenAsync(this).ConfigureAwait(false);
-            _client.DefaultRequestHeaders.Add("X-Vault-Token", token);
+            _auth = authentication;
+            return AuthenticateAsync(force: true);
         }
 
-        internal Task<HttpResponseMessage> GetAsync(string path)
+        async Task AuthenticateAsync(bool force)
+        {
+            if (force || !_authenticated)
+            {
+                await _authLock.WaitAsync().ConfigureAwait(false);
+                try
+                {
+                    if (force || !_authenticated)
+                    {
+                        const string HEADER = "X-Vault-Token";
+                        var token = await _auth.GetTokenAsync(this).ConfigureAwait(false);
+                        _client.DefaultRequestHeaders.Remove(HEADER);
+                        _client.DefaultRequestHeaders.Add(HEADER, token);
+                        _authenticated = true;
+                    }
+                }
+                finally
+                {
+                    _authLock.Release();
+                }
+            }
+        }
+
+        internal async Task<T> EnsureAuthenticated<T>(Func<Task<T>> func)
+        {
+            await AuthenticateAsync(force: false).ConfigureAwait(false);
+            try
+            {
+                return await func().ConfigureAwait(false);
+            }
+            catch (SecurityException)
+            {
+                // Continue outside the catch...
+            }
+
+            // Second try
+            await AuthenticateAsync(force: true).ConfigureAwait(false);
+            return await func().ConfigureAwait(false);
+        }
+
+        internal async Task<T> GetAsync<T>(string path)
         {
             var uri = new Uri(_baseUri, path);
-            return _client.GetAsync(uri);
+            var response = await _client.GetAsync(uri).ConfigureAwait(false);
+            return await ParseResponseAsync<T>(response).ConfigureAwait(false);
         }
 
-        internal Task<HttpResponseMessage> PostAsync(string path, object parameters)
+        internal async Task<T> PostAsync<T>(string path, object parameters)
         {
             var uri = new Uri(_baseUri, path);
             var content = new StringContent(JsonConvert.SerializeObject(parameters), Encoding.UTF8);
-            return _client.PostAsync(uri, content);
+            var response = await _client.PostAsync(uri, content).ConfigureAwait(false);
+            return await ParseResponseAsync<T>(response);
         }
 
         async Task<T> ParseResponseAsync<T>(HttpResponseMessage response)
@@ -58,6 +104,9 @@ namespace Turbocharged.Vault
                 case 404:
                     return default(T);
 
+                case 401:
+                    throw new SecurityException("Unauthorized");
+
                 default:
                     var errors = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                     var messages = JsonConvert.DeserializeObject<ErrorResponse>(errors);
@@ -71,23 +120,27 @@ namespace Turbocharged.Vault
             public List<string> Errors { get; set; }
         }
 
-        public async Task<SealStatus> SealStatusAsync()
+        public Task<SealStatus> SealStatusAsync()
         {
-            var response = await GetAsync("sys/seal-status").ConfigureAwait(false);
-            return await ParseResponseAsync<SealStatus>(response).ConfigureAwait(false);
+            return GetAsync<SealStatus>("sys/seal-status");
         }
 
-        public async Task WriteSecretAsync(string path, IDictionary<string, object> value)
+        public Task WriteSecretAsync(string path, IDictionary<string, object> value)
         {
-            var response = await PostAsync(path, value).ConfigureAwait(false);
-            await ParseResponseAsync<SealStatus>(response).ConfigureAwait(false);
+            return EnsureAuthenticated(() =>
+            {
+                return PostAsync<object>(path, value);
+            });
         }
 
         public async Task DeleteSecretAsync(string path)
         {
             var uri = new Uri(_baseUri, path);
-            var response = await _client.DeleteAsync(uri).ConfigureAwait(false);
-            await ParseResponseAsync<object>(response);
+            await EnsureAuthenticated(async () =>
+            {
+                var response = await _client.DeleteAsync(uri).ConfigureAwait(false);
+                return await ParseResponseAsync<object>(response);
+            });
         }
 
         /// <summary>
@@ -96,15 +149,21 @@ namespace Turbocharged.Vault
         public async Task<Lease> LeaseAsync(string path)
         {
             var uri = new Uri(_baseUri, path);
-            var response = await _client.GetAsync(uri).ConfigureAwait(false);
-            return await ParseResponseAsync<Lease>(response).ConfigureAwait(false);
+            return await EnsureAuthenticated(async () =>
+            {
+                var response = await _client.GetAsync(uri).ConfigureAwait(false);
+                return await ParseResponseAsync<Lease>(response).ConfigureAwait(false);
+            });
         }
 
         public async Task<Lease> RenewAsync(Lease lease)
         {
             var uri = new Uri(_baseUri, "sys/renew/" + lease.LeaseId);
-            var response = await _client.PutAsync(uri, null).ConfigureAwait(false);
-            return await ParseResponseAsync<Lease>(response);
+            return await EnsureAuthenticated(async () =>
+            {
+                var response = await _client.PutAsync(uri, null).ConfigureAwait(false);
+                return await ParseResponseAsync<Lease>(response);
+            });
         }
     }
 }

@@ -22,26 +22,12 @@ namespace Turbocharged.Vault.Tests
             _uri = Configuration.VaultUri;
         }
 
-        async Task<VaultClient> InitializeWithTokenAsync()
-        {
-            var vault = new VaultClient(_uri, _token);
-            await vault.AuthorizeAsync();
-            return vault;
-        }
-
-        async Task<VaultClient> InitializeWithAppId()
-        {
-            var vault = new VaultClient(_uri, _appId);
-            await vault.AuthorizeAsync();
-            return vault;
-        }
-
         #region Sealing/Unsealing
 
         [Fact]
         public async Task CanRequestSealStatus()
         {
-            var vault = await InitializeWithTokenAsync();
+            var vault = new VaultClient(_uri, _token);
             var response = await vault.SealStatusAsync();
             Assert.NotNull(response);
             Assert.Equal(false, response.Sealed);
@@ -56,21 +42,29 @@ namespace Turbocharged.Vault.Tests
         {
             var badToken = new TokenAuthentication(Guid.NewGuid().ToString());
             var vault = new VaultClient(_uri, badToken);
-            await vault.AuthorizeAsync(); // Not strictly necessary for TokenAuth, but whatever
             await Assert.ThrowsAsync<VaultException>(() => vault.WriteSecretAsync("foo", EMPTY_SECRET));
         }
 
         [Fact]
         public async Task CanUseTokenAuthentication()
         {
-            var vault = await InitializeWithTokenAsync();
+            var vault = new VaultClient(_uri, _token);
             await vault.WriteSecretAsync("foo", new Dictionary<string, object> { { "foo", "bar" } });
         }
 
         [Fact]
         public async Task CanUseAppIdAuthentication()
         {
-            var vault = await InitializeWithAppId();
+            var vault = new VaultClient(_uri, _appId);
+            await vault.WriteSecretAsync("foo", new Dictionary<string, object> { { "foo", "bar" } });
+        }
+
+        [Fact]
+        public async Task CanChangeAuthenticationMethod()
+        {
+            var vault = new VaultClient(_uri, _token);
+            await vault.WriteSecretAsync("foo", new Dictionary<string, object> { { "foo", "bar" } });
+            await vault.AuthenticateAsync(_appId);
             await vault.WriteSecretAsync("foo", new Dictionary<string, object> { { "foo", "bar" } });
         }
 
@@ -84,7 +78,7 @@ namespace Turbocharged.Vault.Tests
             var path = "secret/foo";
             var expectedValue = Guid.NewGuid().ToString();
             var obj = new Dictionary<string, object>() { { "Value", expectedValue } };
-            var vault = await InitializeWithTokenAsync();
+            var vault = new VaultClient(_uri, _token);
             await vault.WriteSecretAsync(path, obj);
             var result = await vault.LeaseAsync(path);
             Assert.NotNull(result);
@@ -97,7 +91,7 @@ namespace Turbocharged.Vault.Tests
             var path = "secret/foo";
             var expectedValue = Guid.NewGuid().ToString();
             var obj = new Dictionary<string, object>() { { "Value", expectedValue } };
-            var vault = await InitializeWithTokenAsync();
+            var vault = new VaultClient(_uri, _token);
             await vault.WriteSecretAsync(path, obj);
             await vault.DeleteSecretAsync(path);
             var result = await vault.LeaseAsync(path);

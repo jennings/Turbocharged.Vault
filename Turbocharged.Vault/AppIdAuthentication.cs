@@ -26,12 +26,7 @@ namespace Turbocharged.Vault
                 app_id = _appId,
                 user_id = _userId,
             };
-            var response = await server.PostAsync("auth/app-id/login", parameters).ConfigureAwait(false);
-            if (!response.IsSuccessStatusCode)
-                throw new Exception("nope");
-
-            var leaseAsString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-            var lease = JsonConvert.DeserializeObject<Lease>(leaseAsString);
+            var lease = await server.PostAsync<Lease>("auth/app-id/login", parameters).ConfigureAwait(false);
             return lease.Auth.ClientToken;
         }
     }

@@ -27,7 +27,7 @@ namespace Turbocharged.Vault
             _auth = authentication;
         }
 
-        public async Task InitializeAsync()
+        public async Task AuthorizeAsync()
         {
             var token = await _auth.GetTokenAsync(this).ConfigureAwait(false);
             _client.DefaultRequestHeaders.Add("X-Vault-Token", token);
@@ -58,19 +58,17 @@ namespace Turbocharged.Vault
                 case 404:
                     return default(T);
 
-                case 401:
-                    throw new SecurityException("Not authorized");
-
-                case 429:
-                    throw new Exception("Rate limit exceeded");
-
-                case 503:
-                    throw new VaultSealedException();
-
-                case 500:
                 default:
-                    throw new Exception("HTTP " + response.StatusCode);
+                    var errors = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    var messages = JsonConvert.DeserializeObject<ErrorResponse>(errors);
+                    throw new VaultException((int)response.StatusCode, messages.Errors);
             }
+        }
+
+        class ErrorResponse
+        {
+            [JsonProperty("errors")]
+            public List<string> Errors { get; set; }
         }
 
         public async Task<SealStatus> SealStatusAsync()
@@ -107,18 +105,6 @@ namespace Turbocharged.Vault
             var uri = new Uri(_baseUri, "sys/renew/" + lease.LeaseId);
             var response = await _client.PutAsync(uri, null).ConfigureAwait(false);
             return await ParseResponseAsync<Lease>(response);
-        }
-
-        void HandleError(HttpResponseMessage response)
-        {
-            if (response.StatusCode == (HttpStatusCode)401)
-            {
-                throw new System.Security.SecurityException();
-            }
-            else if (response.StatusCode == (HttpStatusCode)503)
-            {
-                throw new VaultSealedException();
-            }
         }
     }
 }

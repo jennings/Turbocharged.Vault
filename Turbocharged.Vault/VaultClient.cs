@@ -31,6 +31,9 @@ namespace Turbocharged.Vault
             _auth = authentication;
         }
 
+        /// <summary>
+        /// Changes the method used to authenticate with the Vault.
+        /// </summary>
         public Task AuthenticateAsync(IAuthenticationMethod authentication)
         {
             _auth = authentication;
@@ -110,7 +113,14 @@ namespace Turbocharged.Vault
                 default:
                     var errors = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                     var messages = JsonConvert.DeserializeObject<ErrorResponse>(errors);
-                    throw new VaultException((int)response.StatusCode, messages.Errors);
+                    if (messages != null && messages.Errors != null)
+                    {
+                        throw new VaultException((int)response.StatusCode, messages.Errors);
+                    }
+                    else
+                    {
+                        throw new VaultException((int)response.StatusCode, new List<string>() { response.StatusCode.ToString() });
+                    }
             }
         }
 
@@ -120,11 +130,18 @@ namespace Turbocharged.Vault
             public List<string> Errors { get; set; }
         }
 
+        /// <summary>
+        /// Queries the Vault for whether it is currently sealed.
+        /// </summary>
+        /// <returns>The seal status of the Vault.</returns>
         public Task<SealStatus> SealStatusAsync()
         {
             return GetAsync<SealStatus>("sys/seal-status");
         }
 
+        /// <summary>
+        /// Writes a new secret to the Vault, or replaces an existing one.
+        /// </summary>
         public Task WriteSecretAsync(string path, IDictionary<string, object> value)
         {
             return EnsureAuthenticated(() =>
@@ -133,6 +150,9 @@ namespace Turbocharged.Vault
             });
         }
 
+        /// <summary>
+        /// Deletes a secret from the Vault.
+        /// </summary>
         public async Task DeleteSecretAsync(string path)
         {
             var uri = new Uri(_baseUri, path);
@@ -144,8 +164,9 @@ namespace Turbocharged.Vault
         }
 
         /// <summary>
-        /// Returns a lease for a secret, or null if the secret doesn't exist.
+        /// Leases a secret from the Vault.
         /// </summary>
+        /// <returns>The lease, or null if the secret doesn't exist.</returns>
         public async Task<Lease> LeaseAsync(string path)
         {
             var uri = new Uri(_baseUri, path);
@@ -156,6 +177,10 @@ namespace Turbocharged.Vault
             });
         }
 
+        /// <summary>
+        /// Renews the lease on a secret.
+        /// </summary>
+        /// <returns>A renewed lease.</returns>
         public async Task<Lease> RenewAsync(Lease lease)
         {
             var uri = new Uri(_baseUri, "sys/renew/" + lease.LeaseId);

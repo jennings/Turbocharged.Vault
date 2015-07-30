@@ -32,6 +32,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\Turbocharged.Vault.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="TokenAuthentication.cs" />

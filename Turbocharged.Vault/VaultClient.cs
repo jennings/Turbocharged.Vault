@@ -139,6 +139,22 @@ namespace Turbocharged.Vault
             return GetAsync<SealStatus>("sys/seal-status");
         }
 
+        public async Task SealAsync()
+        {
+            var uri = new Uri(_baseUri, "sys/seal");
+            var empty = new ByteArrayContent(new byte[0]);
+            var response = await EnsureAuthenticated(() => _client.PutAsync(uri, empty)).ConfigureAwait(false);
+            await ParseResponseAsync<object>(response).ConfigureAwait(false);
+        }
+
+        public async Task<SealStatus> UnsealAsync(string unsealKey)
+        {
+            var uri = new Uri(_baseUri, "sys/unseal");
+            var empty = new StringContent(@"{""key"":""" + unsealKey + @"""}", Encoding.UTF8);
+            var response = await _client.PutAsync(uri, empty).ConfigureAwait(false);
+            return await ParseResponseAsync<SealStatus>(response).ConfigureAwait(false);
+        }
+
         /// <summary>
         /// Writes a new secret to the Vault, or replaces an existing one.
         /// </summary>

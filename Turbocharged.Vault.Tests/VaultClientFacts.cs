@@ -33,6 +33,21 @@ namespace Turbocharged.Vault.Tests
             Assert.Equal(false, response.Sealed);
         }
 
+        [Fact]
+        public async Task CanSealAndUnseal()
+        {
+            var vault = new VaultClient(_uri, _token);
+            var response = await vault.SealStatusAsync();
+            Assert.False(response.Sealed, "Vault was already sealed");
+
+            await vault.SealAsync();
+            response = await vault.SealStatusAsync();
+            Assert.True(response.Sealed, "The Vault did not seal");
+
+            response = await vault.UnsealAsync(Configuration.UnsealKey);
+            Assert.False(response.Sealed, "The Vault did not unseal");
+        }
+
         #endregion
 
         #region Authentication/Authorization

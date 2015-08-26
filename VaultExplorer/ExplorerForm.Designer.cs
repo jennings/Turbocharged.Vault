@@ -33,13 +33,23 @@
             this.sealButton = new System.Windows.Forms.Button();
             this.unsealKeyTextBox = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.backendsTabControl = new System.Windows.Forms.TabControl();
-            this.tabPage1 = new System.Windows.Forms.TabPage();
             this.sealStatusButton = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.sealStatusLabel = new System.Windows.Forms.Label();
+            this.mountsGroupBox = new System.Windows.Forms.GroupBox();
+            this.secretsGroupBox = new System.Windows.Forms.GroupBox();
+            this.mountsListBox = new System.Windows.Forms.ListBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.pathTextBox = new System.Windows.Forms.TextBox();
+            this.getSecretButton = new System.Windows.Forms.Button();
+            this.secretDataGridView = new System.Windows.Forms.DataGridView();
+            this.saveButton = new System.Windows.Forms.Button();
+            this.keyColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.valueColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.groupBox1.SuspendLayout();
-            this.backendsTabControl.SuspendLayout();
+            this.mountsGroupBox.SuspendLayout();
+            this.secretsGroupBox.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.secretDataGridView)).BeginInit();
             this.SuspendLayout();
             // 
             // groupBox1
@@ -100,28 +110,6 @@
             this.label1.TabIndex = 3;
             this.label1.Text = "Unseal key";
             // 
-            // backendsTabControl
-            // 
-            this.backendsTabControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.backendsTabControl.Controls.Add(this.tabPage1);
-            this.backendsTabControl.Location = new System.Drawing.Point(22, 179);
-            this.backendsTabControl.Name = "backendsTabControl";
-            this.backendsTabControl.SelectedIndex = 0;
-            this.backendsTabControl.Size = new System.Drawing.Size(894, 713);
-            this.backendsTabControl.TabIndex = 1;
-            // 
-            // tabPage1
-            // 
-            this.tabPage1.Location = new System.Drawing.Point(4, 29);
-            this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(886, 680);
-            this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "Secret";
-            this.tabPage1.UseVisualStyleBackColor = true;
-            // 
             // sealStatusButton
             // 
             this.sealStatusButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -151,18 +139,131 @@
             this.sealStatusLabel.TabIndex = 7;
             this.sealStatusLabel.Text = "Unknown";
             // 
+            // mountsGroupBox
+            // 
+            this.mountsGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.mountsGroupBox.Controls.Add(this.mountsListBox);
+            this.mountsGroupBox.Location = new System.Drawing.Point(12, 161);
+            this.mountsGroupBox.Name = "mountsGroupBox";
+            this.mountsGroupBox.Size = new System.Drawing.Size(279, 731);
+            this.mountsGroupBox.TabIndex = 1;
+            this.mountsGroupBox.TabStop = false;
+            this.mountsGroupBox.Text = "Mounts";
+            // 
+            // secretsGroupBox
+            // 
+            this.secretsGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.secretsGroupBox.Controls.Add(this.saveButton);
+            this.secretsGroupBox.Controls.Add(this.secretDataGridView);
+            this.secretsGroupBox.Controls.Add(this.getSecretButton);
+            this.secretsGroupBox.Controls.Add(this.pathTextBox);
+            this.secretsGroupBox.Controls.Add(this.label3);
+            this.secretsGroupBox.Location = new System.Drawing.Point(297, 161);
+            this.secretsGroupBox.Name = "secretsGroupBox";
+            this.secretsGroupBox.Size = new System.Drawing.Size(619, 731);
+            this.secretsGroupBox.TabIndex = 2;
+            this.secretsGroupBox.TabStop = false;
+            this.secretsGroupBox.Text = "Secrets";
+            // 
+            // mountsListBox
+            // 
+            this.mountsListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.mountsListBox.FormattingEnabled = true;
+            this.mountsListBox.ItemHeight = 20;
+            this.mountsListBox.Location = new System.Drawing.Point(14, 25);
+            this.mountsListBox.MultiColumn = true;
+            this.mountsListBox.Name = "mountsListBox";
+            this.mountsListBox.Size = new System.Drawing.Size(252, 684);
+            this.mountsListBox.TabIndex = 0;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(6, 28);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(42, 20);
+            this.label3.TabIndex = 0;
+            this.label3.Text = "Path";
+            // 
+            // pathTextBox
+            // 
+            this.pathTextBox.Location = new System.Drawing.Point(113, 25);
+            this.pathTextBox.Name = "pathTextBox";
+            this.pathTextBox.Size = new System.Drawing.Size(500, 26);
+            this.pathTextBox.TabIndex = 1;
+            // 
+            // getSecretButton
+            // 
+            this.getSecretButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.getSecretButton.Location = new System.Drawing.Point(113, 57);
+            this.getSecretButton.Name = "getSecretButton";
+            this.getSecretButton.Size = new System.Drawing.Size(163, 56);
+            this.getSecretButton.TabIndex = 8;
+            this.getSecretButton.Text = "Query";
+            this.getSecretButton.UseVisualStyleBackColor = true;
+            this.getSecretButton.Click += new System.EventHandler(this.getSecretButton_Click);
+            // 
+            // secretDataGridView
+            // 
+            this.secretDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.secretDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.secretDataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.keyColumn,
+            this.valueColumn});
+            this.secretDataGridView.EditMode = System.Windows.Forms.DataGridViewEditMode.EditOnEnter;
+            this.secretDataGridView.Location = new System.Drawing.Point(10, 119);
+            this.secretDataGridView.Name = "secretDataGridView";
+            this.secretDataGridView.RowTemplate.Height = 28;
+            this.secretDataGridView.Size = new System.Drawing.Size(603, 590);
+            this.secretDataGridView.TabIndex = 9;
+            // 
+            // saveButton
+            // 
+            this.saveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.saveButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.saveButton.ForeColor = System.Drawing.Color.DarkRed;
+            this.saveButton.Location = new System.Drawing.Point(450, 57);
+            this.saveButton.Name = "saveButton";
+            this.saveButton.Size = new System.Drawing.Size(163, 56);
+            this.saveButton.TabIndex = 10;
+            this.saveButton.Text = "Save";
+            this.saveButton.UseVisualStyleBackColor = true;
+            this.saveButton.Click += new System.EventHandler(this.saveButton_Click);
+            // 
+            // keyColumn
+            // 
+            this.keyColumn.DataPropertyName = "Key";
+            this.keyColumn.FillWeight = 50F;
+            this.keyColumn.HeaderText = "Key";
+            this.keyColumn.Name = "keyColumn";
+            // 
+            // valueColumn
+            // 
+            this.valueColumn.DataPropertyName = "Value";
+            this.valueColumn.HeaderText = "Value";
+            this.valueColumn.Name = "valueColumn";
+            // 
             // ExplorerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(928, 904);
-            this.Controls.Add(this.backendsTabControl);
+            this.Controls.Add(this.secretsGroupBox);
+            this.Controls.Add(this.mountsGroupBox);
             this.Controls.Add(this.groupBox1);
             this.Name = "ExplorerForm";
             this.Text = "ExplorerForm";
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
-            this.backendsTabControl.ResumeLayout(false);
+            this.mountsGroupBox.ResumeLayout(false);
+            this.secretsGroupBox.ResumeLayout(false);
+            this.secretsGroupBox.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.secretDataGridView)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -174,10 +275,18 @@
         private System.Windows.Forms.Button sealButton;
         private System.Windows.Forms.TextBox unsealKeyTextBox;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TabControl backendsTabControl;
-        private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.Button sealStatusButton;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label sealStatusLabel;
+        private System.Windows.Forms.GroupBox mountsGroupBox;
+        private System.Windows.Forms.GroupBox secretsGroupBox;
+        private System.Windows.Forms.ListBox mountsListBox;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.TextBox pathTextBox;
+        private System.Windows.Forms.Button getSecretButton;
+        private System.Windows.Forms.DataGridView secretDataGridView;
+        private System.Windows.Forms.Button saveButton;
+        private System.Windows.Forms.DataGridViewTextBoxColumn keyColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn valueColumn;
     }
 }

@@ -23,6 +23,7 @@ namespace VaultExplorer
 
         protected override async void OnLoad(EventArgs e)
         {
+            SetControls(false);
             var status = await _client.SealStatusAsync();
             UpdateSealStatus(status);
         }
@@ -52,20 +53,58 @@ namespace VaultExplorer
         {
             if (status.Sealed)
             {
-                backendsTabControl.Enabled = false;
-                unsealButton.Enabled = true;
-                sealButton.Enabled = false;
-
+                SetControls(false);
                 var required = status.Threshold - status.Progress;
                 sealStatusLabel.Text = "Sealed, " + required + " shares remaining";
             }
             else
             {
                 sealStatusLabel.Text = "Unsealed";
-                backendsTabControl.Enabled = true;
-                unsealButton.Enabled = false;
-                sealButton.Enabled = true;
+                SetControls(true);
             }
+        }
+
+        void SetControls(bool enabled)
+        {
+            secretsGroupBox.Enabled
+                = mountsGroupBox.Enabled
+                = sealButton.Enabled
+                = enabled;
+
+            unsealButton.Enabled
+                = !enabled;
+        }
+
+        async void getSecretButton_Click(object sender, EventArgs e)
+        {
+            var path = pathTextBox.Text;
+            var lease = await _client.LeaseAsync(path);
+            if (lease == null)
+            {
+                MessageBox.Show("Path not found: " + path);
+                return;
+            }
+
+            secretDataGridView.DataSource = lease.Data
+                .Select(d => new
+                {
+                    d.Key,
+                    d.Value
+                })
+                .ToList();
+        }
+
+        async void saveButton_Click(object sender, EventArgs e)
+        {
+            var path = pathTextBox.Text;
+            var data = ((IEnumerable<dynamic>)secretDataGridView.DataSource)
+                .ToDictionary(
+                    obj => (string)obj.Key,
+                    obj => (object)obj.Value);
+
+            await _client.WriteSecretAsync(path, data);
+
+            MessageBox.Show("Saved");
         }
     }
 }

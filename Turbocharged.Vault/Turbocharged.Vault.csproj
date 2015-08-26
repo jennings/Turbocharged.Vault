@@ -35,6 +35,7 @@
     <DocumentationFile>bin\Release\Turbocharged.Vault.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Mount.cs" />
     <Compile Include="TokenAuthentication.cs" />
     <Compile Include="AppIdAuthentication.cs" />
     <Compile Include="Lease.cs" />

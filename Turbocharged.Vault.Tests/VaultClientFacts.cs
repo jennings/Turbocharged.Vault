@@ -83,6 +83,15 @@ namespace Turbocharged.Vault.Tests
             await vault.WriteSecretAsync("foo", new Dictionary<string, object> { { "foo", "bar" } });
         }
 
+        [Fact]
+        public async Task CanGetMounts()
+        {
+            var vault = new VaultClient(_uri, _token);
+            var mounts = await vault.GetMountsAsync();
+            Assert.NotNull(mounts);
+            Assert.True(mounts.Count >= 1);
+        }
+
         #endregion
 
         #region Secrets

@@ -206,5 +206,22 @@ namespace Turbocharged.Vault
                 return await ParseResponseAsync<Lease>(response);
             });
         }
+
+        public async Task<List<Mount>> GetMountsAsync()
+        {
+            var uri = new Uri(_baseUri, "sys/mounts");
+            return await EnsureAuthenticated(async () =>
+            {
+                var response = await _client.GetAsync(uri).ConfigureAwait(false);
+                var mountDictionary = await ParseResponseAsync<Dictionary<string, Mount>>(response);
+                return mountDictionary
+                    .Select(kvp =>
+                    {
+                        kvp.Value.Path = kvp.Key;
+                        return kvp.Value;
+                    })
+                    .ToList();
+            });
+        }
     }
 }

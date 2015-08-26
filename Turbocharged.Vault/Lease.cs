@@ -14,7 +14,20 @@ namespace Turbocharged.Vault
         public string LeaseId { get; set; }
 
         [JsonProperty("lease_duration")]
-        public int LeaseDuration { get; set; }
+        public int LeaseDuration
+        {
+            get { return _leaseDuration; }
+            set
+            {
+                _leaseDuration = value;
+                LeaseEnd = DateTimeOffset.Now.AddSeconds(value);
+            }
+        }
+
+        int _leaseDuration;
+
+        [JsonIgnore]
+        public DateTimeOffset LeaseEnd { get; private set; }
 
         [JsonProperty("renewable")]
         public bool Renewable { get; set; }

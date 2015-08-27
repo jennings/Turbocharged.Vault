@@ -11,6 +11,9 @@ using Newtonsoft.Json;
 
 namespace Turbocharged.Vault
 {
+    /// <summary>
+    /// A client for communicating with a vault server.
+    /// </summary>
     public class VaultClient
     {
         readonly HttpClient _client = new HttpClient();
@@ -21,7 +24,7 @@ namespace Turbocharged.Vault
         IAuthenticationMethod _auth;
 
         /// <summary>
-        /// A client for communicating with a Vault server.
+        /// Creates a new VaultClient.
         /// </summary>
         /// <param name="baseUri">The URI of the Vault server</param>
         /// <param name="authentication">The authentication method to use</param>
@@ -139,6 +142,9 @@ namespace Turbocharged.Vault
             return GetAsync<SealStatus>("sys/seal-status");
         }
 
+        /// <summary>
+        /// Seals the vault.
+        /// </summary>
         public async Task SealAsync()
         {
             var uri = new Uri(_baseUri, "sys/seal");
@@ -147,6 +153,12 @@ namespace Turbocharged.Vault
             await ParseResponseAsync<object>(response).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Enters an unseal key to the vault. The vault will not unseal until
+        /// the thresdhold number of valid unseal keys have been entered.
+        /// </summary>
+        /// <param name="unsealKey">The unseal key to enter.</param>
+        /// <returns>The seal status of the vault after this unseal key is entered.</returns>
         public async Task<SealStatus> UnsealAsync(string unsealKey)
         {
             var uri = new Uri(_baseUri, "sys/unseal");
@@ -158,7 +170,9 @@ namespace Turbocharged.Vault
         /// <summary>
         /// Writes a new secret to the Vault, or replaces an existing one.
         /// </summary>
-        public Task WriteSecretAsync(string path, IDictionary<string, object> value)
+        /// <param name="path">The path to write the secret, e.g., "secret/foobar".</param>
+        /// <param name="value">A collection of key-value pairs to write in this secret.</param>
+        public Task WriteSecretAsync(string path, IEnumerable<KeyValuePair<string, object>> value)
         {
             return EnsureAuthenticated(() =>
             {
@@ -169,6 +183,7 @@ namespace Turbocharged.Vault
         /// <summary>
         /// Deletes a secret from the Vault.
         /// </summary>
+        /// <param name="path">The path of the secret to delete.</param>
         public async Task DeleteSecretAsync(string path)
         {
             var uri = new Uri(_baseUri, path);
@@ -207,6 +222,10 @@ namespace Turbocharged.Vault
             });
         }
 
+        /// <summary>
+        /// Gets all the backends mounted in the vault.
+        /// </summary>
+        /// <returns>The mounted backends.</returns>
         public async Task<List<Mount>> GetMountsAsync()
         {
             var uri = new Uri(_baseUri, "sys/mounts");

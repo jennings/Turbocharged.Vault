@@ -9,7 +9,10 @@ namespace Turbocharged.Vault.Tests
 {
     static class Configuration
     {
-        public static Uri VaultUri = new Uri(ConfigurationManager.AppSettings["Vault.Uri"]);
+        public static Uri VaultUri =
+            new Uri(Environment.GetEnvironmentVariable("VAULT_ADDR")
+                ?? ConfigurationManager.AppSettings["Vault.Uri"]);
+
         public static string UnsealKey = ConfigurationManager.AppSettings["Vault.UnsealKey"];
         public static string Token = ConfigurationManager.AppSettings["Vault.Token"];
         public static string AppId = ConfigurationManager.AppSettings["Vault.AppId"];

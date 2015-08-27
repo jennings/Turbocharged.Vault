@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <metadata>
+        <id>Turbocharged.Vault</id>
+        <version>0.1.0</version>
+        <authors>Stephen Jennings</authors>
+        <owners>Stephen Jennings</owners>
+        <projectUrl>https://github.com/jennings/Turbocharged.Vault</projectUrl>
+        <licenseUrl>https://github.com/jennings/Turbocharged.Vault/blob/master/LICENSE.md</licenseUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>A .NET client library for Vault</description>
+        <tags>vault secret password</tags>
+        <dependencies>
+            <dependency id="Microsoft.Net.Http" version="2.2.29" />
+            <dependency id="Newtonsoft.Json" version="7.0.1" />
+        </dependencies>
+    </metadata>
+    <files>
+        <file src="src/Turbocharged.Vault/bin/Release/Turbocharged.Vault.dll" target="lib\portable-net45+win+wpa81+wp80" />
+        <file src="src/Turbocharged.Vault/bin/Release/Turbocharged.Vault.pdb" target="lib\portable-net45+win+wpa81+wp80" />
+        <file src="src/Turbocharged.Vault/bin/Release/Turbocharged.Vault.xml" target="lib\portable-net45+win+wpa81+wp80" />
+    </files>
+</package>

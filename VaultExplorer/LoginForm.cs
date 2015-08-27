@@ -18,6 +18,15 @@ namespace VaultExplorer
             InitializeComponent();
         }
 
+        protected override void OnLoad(EventArgs e)
+        {
+            var vaultAddr = Environment.GetEnvironmentVariable("VAULT_ADDR");
+            if (vaultAddr != null)
+            {
+                baseUriTextBox.Text = vaultAddr;
+            }
+        }
+
         void tokenAuthSignIn_Click(object sender, EventArgs e)
         {
             var baseUri = new Uri(baseUriTextBox.Text);

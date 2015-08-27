@@ -38,6 +38,11 @@ namespace Turbocharged.Vault
         [JsonProperty("auth")]
         internal AuthObject Auth { get; set; }
 
+        public Lease()
+        {
+            Data = new Dictionary<string, object>();
+        }
+
         internal class AuthObject
         {
             [JsonProperty("client_token")]

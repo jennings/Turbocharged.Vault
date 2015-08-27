@@ -192,6 +192,8 @@
             // 
             // pathTextBox
             // 
+            this.pathTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.pathTextBox.Location = new System.Drawing.Point(113, 25);
             this.pathTextBox.Name = "pathTextBox";
             this.pathTextBox.Size = new System.Drawing.Size(500, 26);
@@ -199,7 +201,6 @@
             // 
             // getSecretButton
             // 
-            this.getSecretButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.getSecretButton.Location = new System.Drawing.Point(113, 57);
             this.getSecretButton.Name = "getSecretButton";
             this.getSecretButton.Size = new System.Drawing.Size(163, 56);
@@ -210,12 +211,14 @@
             // 
             // secretDataGridView
             // 
+            this.secretDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.secretDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.secretDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.secretDataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.keyColumn,
             this.valueColumn});
-            this.secretDataGridView.EditMode = System.Windows.Forms.DataGridViewEditMode.EditOnEnter;
             this.secretDataGridView.Location = new System.Drawing.Point(10, 119);
             this.secretDataGridView.Name = "secretDataGridView";
             this.secretDataGridView.RowTemplate.Height = 28;

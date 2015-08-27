@@ -13,9 +13,20 @@ namespace Turbocharged.Vault.Tests
             new Uri(Environment.GetEnvironmentVariable("VAULT_ADDR")
                 ?? ConfigurationManager.AppSettings["Vault.Uri"]);
 
-        public static string UnsealKey = ConfigurationManager.AppSettings["Vault.UnsealKey"];
-        public static string Token = ConfigurationManager.AppSettings["Vault.Token"];
-        public static string AppId = ConfigurationManager.AppSettings["Vault.AppId"];
-        public static string UserId = ConfigurationManager.AppSettings["Vault.UserId"];
+        public static string UnsealKey =
+            Environment.GetEnvironmentVariable("VAULT_UNSEAL_KEY")
+            ?? ConfigurationManager.AppSettings["Vault.UnsealKey"];
+
+        public static string Token =
+            Environment.GetEnvironmentVariable("VAULT_TOKEN")
+            ?? ConfigurationManager.AppSettings["Vault.Token"];
+
+        public static string AppId =
+            Environment.GetEnvironmentVariable("VAULT_APPID_APPID")
+            ?? ConfigurationManager.AppSettings["Vault.AppId"];
+
+        public static string UserId =
+            Environment.GetEnvironmentVariable("VAULT_APPID_USERID")
+            ?? ConfigurationManager.AppSettings["Vault.UserId"];
     }
 }

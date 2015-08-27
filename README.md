@@ -2,6 +2,7 @@ Turbocharged.Vault
 ==================
 
 [![Build status](https://ci.appveyor.com/api/projects/status/xxf2uj4rbqe2yers?svg=true)](https://ci.appveyor.com/project/jennings/turbocharged-vault)
+[![NuGet](https://img.shields.io/nuget/v/Turbocharged.Vault.svg)](http://www.nuget.org/packages/Turbocharged.Vault/)
 
 A .NET client library for using [Vault](https://vaultproject.io).
 

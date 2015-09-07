@@ -14,7 +14,7 @@ namespace Turbocharged.Vault
     /// <summary>
     /// A client for communicating with a vault server.
     /// </summary>
-    public class VaultClient
+    public partial class VaultClient
     {
         readonly HttpClient _client = new HttpClient();
         readonly Uri _baseUri;
@@ -95,6 +95,21 @@ namespace Turbocharged.Vault
             var uri = new Uri(_baseUri, path);
             var content = new StringContent(JsonConvert.SerializeObject(parameters), Encoding.UTF8);
             var response = await _client.PostAsync(uri, content).ConfigureAwait(false);
+            return await ParseResponseAsync<T>(response);
+        }
+
+        internal async Task<T> PutAsync<T>(string path, object parameters)
+        {
+            var uri = new Uri(_baseUri, path);
+            var content = new StringContent(JsonConvert.SerializeObject(parameters), Encoding.UTF8);
+            var response = await _client.PutAsync(uri, content).ConfigureAwait(false);
+            return await ParseResponseAsync<T>(response);
+        }
+
+        internal async Task<T> DeleteAsync<T>(string path)
+        {
+            var uri = new Uri(_baseUri, path);
+            var response = await _client.DeleteAsync(uri).ConfigureAwait(false);
             return await ParseResponseAsync<T>(response);
         }
 

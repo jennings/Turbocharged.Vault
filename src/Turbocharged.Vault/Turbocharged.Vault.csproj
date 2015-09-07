@@ -40,6 +40,7 @@
     <Compile Include="AppIdAuthentication.cs" />
     <Compile Include="Lease.cs" />
     <Compile Include="IAuthentication.cs" />
+    <Compile Include="VaultClient.Policies.cs" />
     <Compile Include="VaultException.cs" />
     <Compile Include="VaultClient.cs" />
     <Compile Include="SealStatus.cs" />

@@ -16,7 +16,7 @@ namespace Turbocharged.Vault
     /// </summary>
     public class VaultClient
     {
-        readonly HttpClient _client = new HttpClient();
+        HttpClient _client = new HttpClient();
         readonly Uri _baseUri;
         readonly SemaphoreSlim _authLock = new SemaphoreSlim(1, 1);
 
@@ -66,7 +66,7 @@ namespace Turbocharged.Vault
             }
         }
 
-        internal async Task<T> EnsureAuthenticated<T>(Func<Task<T>> func)
+        async Task<T> EnsureAuthenticated<T>(Func<Task<T>> func)
         {
             await AuthenticateAsync(force: false).ConfigureAwait(false);
             try

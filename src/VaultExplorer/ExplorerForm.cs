@@ -16,6 +16,7 @@ namespace VaultExplorer
         readonly VaultClient _client;
         BindingList<Pair<string, object>> _secretValues = new BindingList<Pair<string, object>>();
         BindingList<Mount> _mounts = new BindingList<Mount>();
+        BindingList<string> _policyNames = new BindingList<string>();
 
         public ExplorerForm(Uri baseUri, IAuthenticationMethod auth)
         {
@@ -32,7 +33,7 @@ namespace VaultExplorer
             UpdateSealStatus(status);
             if (!status.Sealed)
             {
-                await UpdateMountsAsync();
+                await UpdateAllAsync();
             }
         }
 
@@ -42,7 +43,7 @@ namespace VaultExplorer
             UpdateSealStatus(status);
             if (!status.Sealed)
             {
-                await UpdateMountsAsync();
+                await UpdateAllAsync();
             }
         }
 
@@ -54,8 +55,15 @@ namespace VaultExplorer
             UpdateSealStatus(status);
             if (!status.Sealed)
             {
-                await UpdateMountsAsync();
+                await UpdateAllAsync();
             }
+        }
+
+        Task UpdateAllAsync()
+        {
+            return Task.WhenAll(
+                UpdateMountsAsync(),
+                UpdatePoliciesAsync());
         }
 
         async Task UpdateMountsAsync()
@@ -73,6 +81,23 @@ namespace VaultExplorer
 
             _mounts = new BindingList<Mount>(mounts);
             mountsListBox.DataSource = _mounts;
+        }
+
+        async Task UpdatePoliciesAsync()
+        {
+            List<string> policies;
+            try
+            {
+                policies = await _client.GetPolicyNamesAsync();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+                return;
+            }
+
+            _policyNames = new BindingList<string>(policies);
+            policiesListBox.DataSource = _policyNames;
         }
 
         async void sealButton_Click(object sender, EventArgs e)
@@ -108,8 +133,9 @@ namespace VaultExplorer
 
         void SetControls(bool enabled)
         {
-            secretsGroupBox.Enabled
-                = mountsGroupBox.Enabled
+            secretsTabPage.Enabled
+                = mountsTabPage.Enabled
+                = policiesTabPage.Enabled
                 = sealButton.Enabled
                 = enabled;
 
@@ -172,6 +198,42 @@ namespace VaultExplorer
 
             await _client.WriteSecretAsync(path, data);
 
+            MessageBox.Show("Saved");
+        }
+
+        async void policiesListBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var index = policiesListBox.SelectedIndex;
+            var policy = _policyNames[index];
+            await DisplayPolicy(policy);
+        }
+
+        async Task DisplayPolicy(string name)
+        {
+            var document = await _client.GetPolicyAsync(name);
+            policyNameTextBox.Text = name;
+            policyDocumentTextBox.Text = document;
+        }
+
+        async void savePolicyButton_Click(object sender, EventArgs e)
+        {
+            var name = policyNameTextBox.Text;
+            var document = policyDocumentTextBox.Text;
+
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                MessageBox.Show("Policy must have a name.");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(document))
+            {
+                MessageBox.Show("Policy must have a document.");
+                return;
+            }
+
+            await _client.SetPolicyAsync(name, document);
+            await UpdatePoliciesAsync();
             MessageBox.Show("Saved");
         }
     }

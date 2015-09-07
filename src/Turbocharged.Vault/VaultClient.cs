@@ -90,6 +90,11 @@ namespace Turbocharged.Vault
             return await ParseResponseAsync<T>(response).ConfigureAwait(false);
         }
 
+        internal Task<T> GetWithAuthenticationCheckAsync<T>(string path)
+        {
+            return EnsureAuthenticated<T>(() => GetAsync<T>(path));
+        }
+
         internal async Task<T> PostAsync<T>(string path, object parameters)
         {
             var uri = new Uri(_baseUri, path);
@@ -98,19 +103,30 @@ namespace Turbocharged.Vault
             return await ParseResponseAsync<T>(response);
         }
 
-        internal async Task<T> PutAsync<T>(string path, object parameters)
+        internal Task<T> PostWithAuthenticationCheckAsync<T>(string path, object parameters)
         {
-            var uri = new Uri(_baseUri, path);
-            var content = new StringContent(JsonConvert.SerializeObject(parameters), Encoding.UTF8);
-            var response = await _client.PutAsync(uri, content).ConfigureAwait(false);
-            return await ParseResponseAsync<T>(response);
+            return EnsureAuthenticated<T>(() => PostAsync<T>(path, parameters));
         }
 
-        internal async Task<T> DeleteAsync<T>(string path)
+        internal Task<T> PutWithAuthenticationCheckAsync<T>(string path, object parameters)
         {
-            var uri = new Uri(_baseUri, path);
-            var response = await _client.DeleteAsync(uri).ConfigureAwait(false);
-            return await ParseResponseAsync<T>(response);
+            return EnsureAuthenticated<T>(async () =>
+            {
+                var uri = new Uri(_baseUri, path);
+                var content = new StringContent(JsonConvert.SerializeObject(parameters), Encoding.UTF8);
+                var response = await _client.PutAsync(uri, content).ConfigureAwait(false);
+                return await ParseResponseAsync<T>(response);
+            });
+        }
+
+        internal Task<T> DeleteWithAuthenticationCheckAsync<T>(string path)
+        {
+            return EnsureAuthenticated<T>(async () =>
+            {
+                var uri = new Uri(_baseUri, path);
+                var response = await _client.DeleteAsync(uri).ConfigureAwait(false);
+                return await ParseResponseAsync<T>(response);
+            });
         }
 
         async Task<T> ParseResponseAsync<T>(HttpResponseMessage response)
@@ -227,14 +243,10 @@ namespace Turbocharged.Vault
         /// Renews the lease on a secret.
         /// </summary>
         /// <returns>A renewed lease.</returns>
-        public async Task<Lease> RenewAsync(Lease lease)
+        public Task<Lease> RenewAsync(Lease lease)
         {
-            var uri = new Uri(_baseUri, "sys/renew/" + lease.LeaseId);
-            return await EnsureAuthenticated(async () =>
-            {
-                var response = await _client.PutAsync(uri, null).ConfigureAwait(false);
-                return await ParseResponseAsync<Lease>(response);
-            });
+            var path = "sys/renew/" + lease.LeaseId;
+            return PutWithAuthenticationCheckAsync<Lease>(path, null);
         }
 
         /// <summary>
@@ -243,19 +255,14 @@ namespace Turbocharged.Vault
         /// <returns>The mounted backends.</returns>
         public async Task<List<Mount>> GetMountsAsync()
         {
-            var uri = new Uri(_baseUri, "sys/mounts");
-            return await EnsureAuthenticated(async () =>
-            {
-                var response = await _client.GetAsync(uri).ConfigureAwait(false);
-                var mountDictionary = await ParseResponseAsync<Dictionary<string, Mount>>(response);
-                return mountDictionary
-                    .Select(kvp =>
-                    {
-                        kvp.Value.Path = kvp.Key;
-                        return kvp.Value;
-                    })
-                    .ToList();
-            });
+            var path = "sys/mounts";
+            var response = await GetWithAuthenticationCheckAsync<Dictionary<string, Mount>>(path).ConfigureAwait(false);
+            return response
+                .Select(kvp =>
+                {
+                    kvp.Value.Path = kvp.Key;
+                    return kvp.Value;
+                }).ToList();
         }
     }
 }

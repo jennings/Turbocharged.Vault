@@ -39,32 +39,21 @@ namespace Turbocharged.Vault
         public async Task<string> GetPolicyAsync(string policyName)
         {
             var path = "sys/policy/" + policyName;
-            return await EnsureAuthenticated(async () =>
-            {
-                var response = await GetAsync<PolicyResponse>(path).ConfigureAwait(false);
-                return response.rules;
-            }).ConfigureAwait(false);
+            var response = await GetWithAuthenticationCheckAsync<PolicyResponse>(path).ConfigureAwait(false);
+            return response.rules;
         }
 
         public async Task SetPolicyAsync(string policyName, string document)
         {
             var path = "sys/policy/" + policyName;
             var policy = new Dictionary<string, string>() { { "rules", document } };
-            await EnsureAuthenticated(async () =>
-            {
-                var response = await PutAsync<object>(path, policy);
-                return 0;
-            }).ConfigureAwait(false);
+            await PutWithAuthenticationCheckAsync<object>(path, policy);
         }
 
-        public async Task DeletePolicyAsync(string policyName)
+        public Task DeletePolicyAsync(string policyName)
         {
             var path = "sys/policy/" + policyName;
-            await EnsureAuthenticated(async () =>
-            {
-                var response = await DeleteAsync<object>(path);
-                return 0;
-            }).ConfigureAwait(false);
+            return DeleteWithAuthenticationCheckAsync<object>(path);
         }
 
         class SetPolicyResponse
